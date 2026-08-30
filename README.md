@@ -8,7 +8,7 @@
   [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-  [![License](https://img.shields.io/badge/License-MIT-teal.svg?style=for-the-badge)](LICENSE)
+  [![Repository](https://img.shields.io/badge/Repository-Private-red.svg?style=for-the-badge)](https://github.com/jonathancerezo456-pixel/biomedic-solution)
 
   <br />
 </div>
@@ -121,9 +121,9 @@ biomedic-solution/
 
 ---
 
-## 📄 Licencia
+## 🔒 Licencia y Propiedad Privada
 
-Este proyecto está bajo la Licencia [MIT](LICENSE).
+Este proyecto es un software de **código cerrado y privado**. Todos los derechos reservados. No se permite la copia, distribución ni reproducción del código fuente sin autorización del propietario.
 
 ---
 
