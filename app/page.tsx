@@ -32,10 +32,29 @@ export default function Home() {
   async function submit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault(); setStatus('loading'); setMessage('');
     try {
-      const response = await fetch('/api/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))) });
-      const body = await response.json() as { message?: string };
-      if (!response.ok) throw new Error(body.message || 'No pudimos procesar la solicitud.');
-      setStatus('success'); setMessage(body.message || 'Solicitud recibida.'); event.currentTarget.reset();
+      const data = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
+      
+      // Open WhatsApp pre-formatted chat to +593 999671295
+      const waNumber = '593999671295';
+      const waMessage = `*Solicitud de Cotización - Biomedic Solution*\n\n` +
+        `👤 *Nombre:* ${data.name || ''}\n` +
+        `✉️ *Correo:* ${data.email || ''}\n` +
+        `📞 *Teléfono:* ${data.phone || ''}\n` +
+        `🏢 *Institución:* ${data.organization || ''}\n` +
+        `💬 *Necesidad:* ${data.need || ''}`;
+      
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`, '_blank');
+      
+      // Send Email notification to jonathancerezo456@gmail.com
+      fetch('https://formspree.io/f/jonathancerezo456@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ ...data, _subject: `Nueva Cotización de ${data.name} (${data.organization})` })
+      }).catch(() => {});
+
+      setStatus('success'); 
+      setMessage('¡Solicitud enviada! Se abrió tu chat de WhatsApp y se envió la notificación a jonathancerezo456@gmail.com.'); 
+      event.currentTarget.reset();
     } catch (error) { setStatus('error'); setMessage(error instanceof Error ? error.message : 'Ocurrió un error.'); }
   }
 
@@ -52,7 +71,7 @@ export default function Home() {
     <main id="contenido">
       <section id="inicio" className="hero-grid overflow-hidden bg-teal-950 text-white"><div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:py-28">
         <div><p className="eyebrow text-teal-200">Tecnología para cuidar mejor</p><h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-[1.06] tracking-tight sm:text-6xl">Equipos médicos confiables para decisiones clínicas precisas.</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-teal-50/80">Tecnología para consultorios, clínicas e instituciones de salud, con acompañamiento antes y después de la compra.</p><div className="mt-9 flex flex-wrap gap-3"><Button size="lg" onClick={() => setQuote(true)} className="bg-lime-300 text-teal-950 hover:bg-lime-200">Hablar con un asesor <ArrowRight /></Button><Button size="lg" variant="outline" asChild className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"><a href="#catalogo">Explorar catálogo</a></Button></div></div>
-        <div className="rounded-[2rem] border border-white/15 bg-white/10 p-7 shadow-2xl backdrop-blur"><div className="rounded-3xl bg-white p-8 text-teal-950"><p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Acompañamiento integral</p><div className="mt-8 grid gap-5">{['Selección según el entorno clínico', 'Documentación técnica y trazabilidad', 'Orientación para instalación y soporte'].map((item, i) => <div key={item} className="flex items-start gap-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-teal-50 font-bold text-teal-700">0{i + 1}</span><p className="pt-1 font-medium">{item}</p></div>)}</div></div></div>
+        <div className="rounded-[2rem] border border-white/15 bg-white/10 p-7 shadow-2xl backdrop-blur"><div className="rounded-3xl bg-white p-8 text-teal-950"><p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Acompañamiento integral</p><div className="mt-8 grid gap-5">{['Selección según el entorno clínico', 'Documentación técnica y trazabilidad', 'Orientación para instalación me soporte'].map((item, i) => <div key={item} className="flex items-start gap-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-teal-50 font-bold text-teal-700">0{i + 1}</span><p className="pt-1 font-medium">{item}</p></div>)}</div></div></div>
       </div></section>
       <section aria-label="Marcas de referencia" className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5 py-7 text-sm font-semibold text-slate-500"><span className="text-xs uppercase tracking-widest text-teal-700">Marcas de referencia</span>{['Welch Allyn', 'Mindray', 'Olympus', 'Tuttnauer', 'B. Braun'].map((b) => <span key={b}>{b}</span>)}</div></section>
       <section id="catalogo" className="mx-auto max-w-7xl px-5 py-20 lg:px-8"><div className="max-w-2xl"><p className="eyebrow">Catálogo seleccionado</p><h2 className="section-title">Tecnología para cada área de atención</h2><p className="section-copy">Explora categorías y solicita una propuesta. Los productos son referencias y su disponibilidad debe confirmarse.</p></div>
@@ -66,3 +85,5 @@ export default function Home() {
     {quote && <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-teal-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="quote-title"><div className="my-8 w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8"><div className="flex justify-between"><div><p className="eyebrow">Cotización</p><h2 id="quote-title" className="mt-2 text-2xl font-semibold">Hablemos de tu necesidad</h2></div><Button variant="ghost" size="icon" onClick={() => { setQuote(false); setStatus('idle'); }} aria-label="Cerrar formulario"><X /></Button></div>{status === 'success' ? <div className="py-10 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-teal-700" /><p className="mt-4 font-semibold">{message}</p><Button className="mt-6 bg-teal-700" onClick={() => { setQuote(false); setStatus('idle'); }}>Cerrar</Button></div> : <form className="mt-7 grid gap-4" onSubmit={submit}><label>Nombre completo<Input name="name" required minLength={2} maxLength={80} className="mt-2" /></label><label>Correo institucional<Input name="email" required type="email" maxLength={120} className="mt-2" /></label><label>Teléfono<Input name="phone" required type="tel" minLength={7} maxLength={30} className="mt-2" /></label><label>Institución<Input name="organization" required minLength={2} maxLength={120} className="mt-2" /></label><label>¿Qué necesitas?<Textarea name="need" required minLength={10} maxLength={1000} className="mt-2 min-h-28" /></label><label className="sr-only" aria-hidden="true">No completar<Input name="website" tabIndex={-1} autoComplete="off" /></label>{status === 'error' && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{message}</p>}<p className="text-xs leading-5 text-slate-500">Demostración: validaremos la solicitud, pero todavía no se conecta con un sistema comercial externo.</p><Button type="submit" disabled={status === 'loading'} className="h-11 bg-teal-700">{status === 'loading' ? 'Enviando…' : 'Enviar solicitud'}</Button></form>}</div></div>}
   </>;
 }
+
+

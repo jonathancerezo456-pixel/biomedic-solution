@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="520" height="120" fill="none">
+  <defs>
+    <linearGradient id="gearGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C8FF"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Gear & Ring Emblem -->
+  <g transform="translate(10, 10)">
+    <!-- Gear teeth and circle -->
+    <path d="M50 20 L55 20 L57 26 L63 28 L68 24 L72 27 L70 33 L75 37 L81 35 L83 40 L77 44 L80 50 L86 52 L86 58 L80 60 L77 66 L83 70 L81 75 L75 73 L70 77 L72 83 L68 86 L63 82 L57 84 L55 90 L50 90 L45 90 L43 84 L37 82 L32 86 L28 83 L30 77 L25 73 L19 75 L17 70 L23 66 L20 60 L14 58 L14 52 L20 50 L23 44 L17 40 L19 35 L25 37 L30 33 L28 27 L32 24 L37 28 L43 26 L45 20 Z" fill="url(#gearGrad)" />
+    <circle cx="50" cy="55" r="22" fill="#ffffff" />
+    <circle cx="50" cy="55" r="16" fill="url(#gearGrad)" />
+    
+    <!-- Orbital Swoosh Ring -->
+    <ellipse cx="50" cy="55" rx="42" ry="18" fill="none" stroke="url(#ringGrad)" stroke-width="7" transform="rotate(-30 50 55)" stroke-linecap="round" />
+  </g>
+
+  <!-- Brand Text: BIOMEDIC SOLUTIONS -->
+  <text x="125" y="58" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="34" font-weight="900" fill="#0f172a" letter-spacing="0.5">BIOMEDIC <tspan fill="#0284c7">SOLUTIONS</tspan></text>
+  
+  <!-- Subtext: GUAYAQUIL - ECUADOR -->
+  <text x="127" y="88" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#0f766e" letter-spacing="4.5">GUAYAQUIL - ECUADOR</text>
+</svg>

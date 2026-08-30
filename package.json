@@ -1,6 +1,21 @@
 {
-  "name": "sites-project",
-  "version": "0.1.0",
+  "name": "biomedic-solution",
+  "version": "1.0.0",
+  "description": "Plataforma web moderna de equipamiento médico y soluciones biomédicas para consultorios, clínicas e instituciones de salud.",
+  "author": "Jonathan Cerezo <jonathancerezo456@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonathancerezo456-pixel/biomedic-solution.git"
+  },
+  "keywords": [
+    "biomedical",
+    "medical-equipment",
+    "nextjs",
+    "react",
+    "tailwindcss",
+    "typescript"
+  ],
   "private": true,
   "engines": {
     "node": ">=22.13.0"
