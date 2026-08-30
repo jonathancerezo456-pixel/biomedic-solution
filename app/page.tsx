@@ -1,8 +1,7 @@
 'use client';
-/* oxlint-disable jsx-a11y/label-has-associated-control, jsx-a11y/prefer-tag-over-role, next/no-img-element -- local WebP assets are pre-resized and compressed */
 
 import { useMemo, useState, type SyntheticEvent } from 'react';
-import { ArrowRight, CheckCircle2, HeartPulse, Menu, Search, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Menu, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +14,7 @@ const products = [
   ['Sistema de endoscopia EVIS', 'Olympus', 'Endoscopia', 'Plataforma de imagen para procedimientos endoscópicos.', '/equipment/endoscopia.webp'],
   ['Bomba de infusión compacta', 'B. Braun', 'Infusión', 'Administración controlada con alarmas visuales y auditivas.', '/equipment/bomba-infusion.webp'],
 ] as const;
+
 const categories = ['Todos', ...Array.from(new Set(products.map((p) => p[2])))];
 
 export default function Home() {
@@ -24,68 +24,404 @@ export default function Home() {
   const [quote, setQuote] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const visible = useMemo(() => products.filter((p) => {
-    const needle = query.toLowerCase().trim();
-    return (category === 'Todos' || p[2] === category) && (!needle || `${p[0]} ${p[1]} ${p[2]}`.toLowerCase().includes(needle));
-  }), [query, category]);
+
+  const visible = useMemo(
+    () =>
+      products.filter((p) => {
+        const needle = query.toLowerCase().trim();
+        return (
+          (category === 'Todos' || p[2] === category) &&
+          (!needle || `${p[0]} ${p[1]} ${p[2]}`.toLowerCase().includes(needle))
+        );
+      }),
+    [query, category]
+  );
 
   async function submit(event: SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault(); setStatus('loading'); setMessage('');
+    event.preventDefault();
+    setStatus('loading');
+    setMessage('');
     try {
       const data = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
-      
+
       // Open WhatsApp pre-formatted chat to +593 999671295
       const waNumber = '593999671295';
-      const waMessage = `*Solicitud de Cotización - Biomedic Solution*\n\n` +
+      const waMessage =
+        `*Solicitud de Cotización - Biomedic Solution*\n\n` +
         `👤 *Nombre:* ${data.name || ''}\n` +
         `✉️ *Correo:* ${data.email || ''}\n` +
         `📞 *Teléfono:* ${data.phone || ''}\n` +
         `🏢 *Institución:* ${data.organization || ''}\n` +
         `💬 *Necesidad:* ${data.need || ''}`;
-      
+
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`, '_blank');
-      
+
       // Send Email notification to jonathancerezo456@gmail.com
       fetch('https://formspree.io/f/jonathancerezo456@gmail.com', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ ...data, _subject: `Nueva Cotización de ${data.name} (${data.organization})` })
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ ...data, _subject: `Nueva Cotización de ${data.name} (${data.organization})` }),
       }).catch(() => {});
 
-      setStatus('success'); 
-      setMessage('¡Solicitud enviada! Se abrió tu chat de WhatsApp y se envió la notificación a jonathancerezo456@gmail.com.'); 
+      setStatus('success');
+      setMessage('¡Solicitud enviada! Se abrió tu chat de WhatsApp y se envió la notificación por correo.');
       event.currentTarget.reset();
-    } catch (error) { setStatus('error'); setMessage(error instanceof Error ? error.message : 'Ocurrió un error.'); }
+    } catch (error) {
+      setStatus('error');
+      setMessage(error instanceof Error ? error.message : 'Ocurrió un error al procesar la solicitud.');
+    }
   }
 
-  return <>
-    <a className="skip-link" href="#contenido">Saltar al contenido</a>
-    <header className="sticky top-0 z-40 border-b border-teal-950/10 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
-        <a href="#inicio" className="flex items-center gap-3" aria-label="Biomedic Solution, inicio">
-          <img src="/equipment/logo.svg" alt="Biomedic Solution Logo" className="h-14 sm:h-16 lg:h-20 w-auto object-contain transition duration-200 hover:scale-105" />
-        </a>
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Navegación principal"><a href="#catalogo">Catálogo</a><a href="#servicios">Servicios</a><a href="#confianza">Por qué elegirnos</a></nav>
-        <div className="flex gap-2"><Button onClick={() => setQuote(true)} className="hidden bg-teal-700 hover:bg-teal-800 sm:inline-flex">Solicitar cotización</Button><Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMenu(!menu)} aria-label={menu ? 'Cerrar menú' : 'Abrir menú'}>{menu ? <X /> : <Menu />}</Button></div>
-      </div>
-      {menu && <nav className="grid gap-3 border-t px-5 py-4 md:hidden"><a href="#catalogo" onClick={() => setMenu(false)}>Catálogo</a><a href="#servicios" onClick={() => setMenu(false)}>Servicios</a><Button onClick={() => { setMenu(false); setQuote(true); }} className="bg-teal-700">Cotizar</Button></nav>}
-    </header>
-    <main id="contenido">
-      <section id="inicio" className="hero-grid overflow-hidden bg-teal-950 text-white"><div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:py-28">
-        <div><p className="eyebrow text-teal-200">Tecnología para cuidar mejor</p><h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-[1.06] tracking-tight sm:text-6xl">Equipos médicos confiables para decisiones clínicas precisas.</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-teal-50/80">Tecnología para consultorios, clínicas e instituciones de salud, con acompañamiento antes y después de la compra.</p><div className="mt-9 flex flex-wrap gap-3"><Button size="lg" onClick={() => setQuote(true)} className="bg-lime-300 text-teal-950 hover:bg-lime-200">Hablar con un asesor <ArrowRight /></Button><Button size="lg" variant="outline" asChild className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"><a href="#catalogo">Explorar catálogo</a></Button></div></div>
-        <div className="rounded-[2rem] border border-white/15 bg-white/10 p-7 shadow-2xl backdrop-blur"><div className="rounded-3xl bg-white p-8 text-teal-950"><p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Acompañamiento integral</p><div className="mt-8 grid gap-5">{['Selección según el entorno clínico', 'Documentación técnica y trazabilidad', 'Orientación para instalación me soporte'].map((item, i) => <div key={item} className="flex items-start gap-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-teal-50 font-bold text-teal-700">0{i + 1}</span><p className="pt-1 font-medium">{item}</p></div>)}</div></div></div>
-      </div></section>
-      <section aria-label="Marcas de referencia" className="border-b bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5 py-7 text-sm font-semibold text-slate-500"><span className="text-xs uppercase tracking-widest text-teal-700">Marcas de referencia</span>{['Welch Allyn', 'Mindray', 'Olympus', 'Tuttnauer', 'B. Braun'].map((b) => <span key={b}>{b}</span>)}</div></section>
-      <section id="catalogo" className="mx-auto max-w-7xl px-5 py-20 lg:px-8"><div className="max-w-2xl"><p className="eyebrow">Catálogo seleccionado</p><h2 className="section-title">Tecnología para cada área de atención</h2><p className="section-copy">Explora categorías y solicita una propuesta. Los productos son referencias y su disponibilidad debe confirmarse.</p></div>
-        <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><label className="relative block max-w-md flex-1"><span className="sr-only">Buscar equipos</span><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar equipo, marca o categoría" className="h-12 pl-12" /></label><div className="flex flex-wrap gap-2" aria-label="Filtrar por categoría">{categories.map((item) => <Button key={item} size="sm" variant={category === item ? 'default' : 'outline'} onClick={() => setCategory(item)} className={category === item ? 'bg-teal-700 hover:bg-teal-800' : ''}>{item}</Button>)}</div></div>
-        {visible.length ? <div className="mt-9 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{visible.map((p) => <article key={p[0]} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"><div className="relative aspect-[4/3] overflow-hidden bg-teal-50"><img src={p[4]} alt={`${p[0]}, imagen ilustrativa sin marca`} width={900} height={675} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]" /><span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur">{p[2]}</span></div><div className="p-6"><p className="text-sm font-semibold text-teal-700">{p[1]}</p><h3 className="mt-1 text-xl font-semibold">{p[0]}</h3><p className="mt-3 min-h-16 leading-7 text-slate-600">{p[3]}</p><Button variant="link" className="mt-4 h-auto p-0 text-teal-700" onClick={() => setQuote(true)}>Solicitar información <ArrowRight /></Button></div></article>)}</div> : <div className="mt-9 rounded-3xl border border-dashed p-12 text-center"><Search className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold">No encontramos coincidencias</h3><p className="mt-2 text-slate-600">Prueba otra búsqueda o muestra todos los productos.</p><Button variant="outline" className="mt-5" onClick={() => { setQuery(''); setCategory('Todos'); }}>Limpiar filtros</Button></div>}
-      </section>
-      <section id="servicios" className="bg-slate-50"><div className="mx-auto max-w-7xl px-5 py-20 lg:px-8"><p className="eyebrow">Más que equipamiento</p><h2 className="section-title">Acompañamiento durante todo el proceso</h2><div className="mt-10 grid gap-5 md:grid-cols-3">{[['01','Asesoría técnica','Evaluamos uso, entorno clínico y requisitos operativos.'],['02','Entrega coordinada','Planeamos recepción, instalación y documentación.'],['03','Soporte posventa','Orientamos mantenimiento y continuidad operativa.']].map((s) => <article key={s[0]} className="rounded-3xl bg-white p-7"><span className="text-sm font-bold text-teal-700">{s[0]}</span><h3 className="mt-5 text-xl font-semibold">{s[1]}</h3><p className="mt-3 leading-7 text-slate-600">{s[2]}</p></article>)}</div></div></section>
-      <section id="confianza" className="mx-auto max-w-7xl px-5 py-20 lg:px-8"><div className="grid gap-10 rounded-[2rem] bg-teal-700 p-8 text-white md:grid-cols-[1fr_auto] md:items-center md:p-12"><div><p className="eyebrow text-teal-100">Tu proyecto, bien acompañado</p><h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Cuéntanos qué necesita tu institución.</h2><p className="mt-4 text-teal-50/80">Te ayudamos a comparar alternativas y preparar una cotización clara.</p></div><Button size="lg" onClick={() => setQuote(true)} className="bg-white text-teal-800 hover:bg-teal-50">Solicitar cotización</Button></div></section>
-    </main>
-    <footer className="border-t bg-slate-50"><div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-8 text-sm text-slate-600 md:flex-row md:items-center md:justify-between lg:px-8"><div className="flex items-center gap-4"><img src="/equipment/logo.svg" alt="Biomedic Solution Logo" className="h-12 w-auto object-contain" /><p>© 2026 Biomedic Solution. Todos los derechos reservados.</p></div><p>Disponibilidad y registros sanitarios varían según el país; confirma antes de comprar.</p></div></footer>
-    {quote && <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-teal-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="quote-title"><div className="my-8 w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8"><div className="flex justify-between"><div><p className="eyebrow">Cotización</p><h2 id="quote-title" className="mt-2 text-2xl font-semibold">Hablemos de tu necesidad</h2></div><Button variant="ghost" size="icon" onClick={() => { setQuote(false); setStatus('idle'); }} aria-label="Cerrar formulario"><X /></Button></div>{status === 'success' ? <div className="py-10 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-teal-700" /><p className="mt-4 font-semibold">{message}</p><Button className="mt-6 bg-teal-700" onClick={() => { setQuote(false); setStatus('idle'); }}>Cerrar</Button></div> : <form className="mt-7 grid gap-4" onSubmit={submit}><label>Nombre completo<Input name="name" required minLength={2} maxLength={80} className="mt-2" /></label><label>Correo institucional<Input name="email" required type="email" maxLength={120} className="mt-2" /></label><label>Teléfono<Input name="phone" required type="tel" minLength={7} maxLength={30} className="mt-2" /></label><label>Institución<Input name="organization" required minLength={2} maxLength={120} className="mt-2" /></label><label>¿Qué necesitas?<Textarea name="need" required minLength={10} maxLength={1000} className="mt-2 min-h-28" /></label><label className="sr-only" aria-hidden="true">No completar<Input name="website" tabIndex={-1} autoComplete="off" /></label>{status === 'error' && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{message}</p>}<p className="text-xs leading-5 text-slate-500">Demostración: validaremos la solicitud, pero todavía no se conecta con un sistema comercial externo.</p><Button type="submit" disabled={status === 'loading'} className="h-11 bg-teal-700">{status === 'loading' ? 'Enviando…' : 'Enviar solicitud'}</Button></form>}</div></div>}
-  </>;
+  return (
+    <>
+      <a className="skip-link" href="#contenido">
+        Saltar al contenido
+      </a>
+
+      {/* Navigation Header */}
+      <header className="sticky top-0 z-40 border-b border-teal-950/10 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 lg:px-8">
+          <a href="#inicio" className="flex items-center gap-3" aria-label="Biomedic Solution, inicio">
+            <img
+              src="/equipment/logo.svg"
+              alt="Biomedic Solution Logo"
+              className="h-14 sm:h-16 lg:h-20 w-auto object-contain transition duration-200 hover:scale-105"
+            />
+          </a>
+
+          <nav className="hidden items-center gap-7 md:flex" aria-label="Navegación principal">
+            <a href="#catalogo" className="text-slate-700 hover:text-teal-700 font-medium transition">
+              Catálogo
+            </a>
+            <a href="#servicios" className="text-slate-700 hover:text-teal-700 font-medium transition">
+              Servicios
+            </a>
+            <a href="#confianza" className="text-slate-700 hover:text-teal-700 font-medium transition">
+              Por qué elegirnos
+            </a>
+          </nav>
+
+          <div className="flex gap-2">
+            <Button onClick={() => setQuote(true)} className="hidden bg-teal-700 hover:bg-teal-800 sm:inline-flex">
+              Solicitar cotización
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMenu(!menu)}
+              aria-label={menu ? 'Cerrar menú' : 'Abrir menú'}
+            >
+              {menu ? <X /> : <Menu />}
+            </Button>
+          </div>
+        </div>
+
+        {menu && (
+          <nav className="grid gap-3 border-t px-5 py-4 md:hidden">
+            <a href="#catalogo" onClick={() => setMenu(false)} className="text-slate-700 font-medium">
+              Catálogo
+            </a>
+            <a href="#servicios" onClick={() => setMenu(false)} className="text-slate-700 font-medium">
+              Servicios
+            </a>
+            <Button
+              onClick={() => {
+                setMenu(false);
+                setQuote(true);
+              }}
+              className="bg-teal-700"
+            >
+              Cotizar
+            </Button>
+          </nav>
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main id="contenido">
+        {/* Hero Section */}
+        <section id="inicio" className="hero-grid overflow-hidden bg-teal-950 text-white">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:py-28">
+            <div>
+              <p className="eyebrow text-teal-200">Tecnología para cuidar mejor</p>
+              <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-[1.06] tracking-tight sm:text-6xl">
+                Equipos médicos confiables para decisiones clínicas precisas.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-teal-50/80">
+                Tecnología para consultorios, clínicas e instituciones de salud, con acompañamiento antes y después de la compra.
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Button size="lg" onClick={() => setQuote(true)} className="bg-lime-300 text-teal-950 hover:bg-lime-200 font-medium">
+                  Hablar con un asesor <ArrowRight className="ml-1 h-5 w-5" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  asChild
+                  className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                >
+                  <a href="#catalogo">Explorar catálogo</a>
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/15 bg-white/10 p-7 shadow-2xl backdrop-blur">
+              <div className="rounded-3xl bg-white p-8 text-teal-950">
+                <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Acompañamiento integral</p>
+                <div className="mt-8 grid gap-5">
+                  {[
+                    'Selección según el entorno clínico',
+                    'Documentación técnica y trazabilidad',
+                    'Orientación para instalación y soporte',
+                  ].map((item, i) => (
+                    <div key={item} className="flex items-start gap-4">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-teal-50 font-bold text-teal-700">
+                        0{i + 1}
+                      </span>
+                      <p className="pt-1 font-medium">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Marcas de Referencia */}
+        <section aria-label="Marcas de referencia" className="border-b bg-white">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5 py-7 text-sm font-semibold text-slate-500">
+            <span className="text-xs uppercase tracking-widest text-teal-700">Marcas de referencia</span>
+            {['Welch Allyn', 'Mindray', 'Olympus', 'Tuttnauer', 'B. Braun'].map((b) => (
+              <span key={b}>{b}</span>
+            ))}
+          </div>
+        </section>
+
+        {/* Catálogo de Productos */}
+        <section id="catalogo" className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Catálogo seleccionado</p>
+            <h2 className="section-title">Tecnología para cada área de atención</h2>
+            <p className="section-copy">
+              Explora categorías y solicita una propuesta. Los productos son referencias y su disponibilidad debe confirmarse.
+            </p>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <label className="relative block max-w-md flex-1">
+              <span className="sr-only">Buscar equipos</span>
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar equipo, marca o categoría"
+                className="h-12 pl-12"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2" aria-label="Filtrar por categoría">
+              {categories.map((item) => (
+                <Button
+                  key={item}
+                  size="sm"
+                  variant={category === item ? 'default' : 'outline'}
+                  onClick={() => setCategory(item)}
+                  className={category === item ? 'bg-teal-700 hover:bg-teal-800' : ''}
+                >
+                  {item}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {visible.length ? (
+            <div className="mt-9 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {visible.map((p) => (
+                <article
+                  key={p[0]}
+                  className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-teal-50">
+                    <img
+                      src={p[4]}
+                      alt={`${p[0]}, imagen ilustrativa sin marca`}
+                      width={900}
+                      height={675}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
+                    />
+                    <span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur">
+                      {p[2]}
+                    </span>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm font-semibold text-teal-700">{p[1]}</p>
+                    <h3 className="mt-1 text-xl font-semibold">{p[0]}</h3>
+                    <p className="mt-3 min-h-16 leading-7 text-slate-600">{p[3]}</p>
+                    <Button
+                      variant="link"
+                      className="mt-4 h-auto p-0 text-teal-700"
+                      onClick={() => setQuote(true)}
+                    >
+                      Solicitar información <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-9 rounded-3xl border border-dashed p-12 text-center">
+              <Search className="mx-auto text-slate-400" />
+              <h3 className="mt-4 text-lg font-semibold">No encontramos coincidencias</h3>
+              <p className="mt-2 text-slate-600">Prueba otra búsqueda o muestra todos los productos.</p>
+              <Button
+                variant="outline"
+                className="mt-5"
+                onClick={() => {
+                  setQuery('');
+                  setCategory('Todos');
+                }}
+              >
+                Limpiar filtros
+              </Button>
+            </div>
+          )}
+        </section>
+
+        {/* Sección de Servicios */}
+        <section id="servicios" className="bg-slate-50">
+          <div className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+            <p className="eyebrow">Más que equipamiento</p>
+            <h2 className="section-title">Acompañamiento durante todo el proceso</h2>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {[
+                ['01', 'Asesoría técnica', 'Evaluamos uso, entorno clínico y requisitos operativos.'],
+                ['02', 'Entrega coordinada', 'Planeamos recepción, instalación y documentación.'],
+                ['03', 'Soporte posventa', 'Orientamos mantenimiento y continuidad operativa.'],
+              ].map((s) => (
+                <article key={s[0]} className="rounded-3xl bg-white p-7">
+                  <span className="text-sm font-bold text-teal-700">{s[0]}</span>
+                  <h3 className="mt-5 text-xl font-semibold">{s[1]}</h3>
+                  <p className="mt-3 leading-7 text-slate-600">{s[2]}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Banner de Confianza */}
+        <section id="confianza" className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+          <div className="grid gap-10 rounded-[2rem] bg-teal-700 p-8 text-white md:grid-cols-[1fr_auto] md:items-center md:p-12">
+            <div>
+              <p className="eyebrow text-teal-100">Tu proyecto, bien acompañado</p>
+              <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Cuéntanos qué necesita tu institución.</h2>
+              <p className="mt-4 text-teal-50/80">Te ayudamos a comparar alternativas y preparar una cotización clara.</p>
+            </div>
+            <Button size="lg" onClick={() => setQuote(true)} className="bg-white text-teal-800 hover:bg-teal-50">
+              Solicitar cotización
+            </Button>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t bg-slate-50">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-8 text-sm text-slate-600 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div className="flex items-center gap-4">
+            <img src="/equipment/logo.svg" alt="Biomedic Solution Logo" className="h-12 w-auto object-contain" />
+            <p>© 2026 Biomedic Solution. Todos los derechos reservados.</p>
+          </div>
+          <p>Disponibilidad y registros sanitarios varían según el país; confirma antes de comprar.</p>
+        </div>
+      </footer>
+
+      {/* Modal de Cotización */}
+      {quote && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-teal-950/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quote-title"
+        >
+          <div className="my-8 w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+            <div className="flex justify-between">
+              <div>
+                <p className="eyebrow">Cotización</p>
+                <h2 id="quote-title" className="mt-2 text-2xl font-semibold">
+                  Hablemos de tu necesidad
+                </h2>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setQuote(false);
+                  setStatus('idle');
+                }}
+                aria-label="Cerrar formulario"
+              >
+                <X />
+              </Button>
+            </div>
+
+            {status === 'success' ? (
+              <div className="py-10 text-center">
+                <CheckCircle2 className="mx-auto h-12 w-12 text-teal-700" />
+                <p className="mt-4 font-semibold">{message}</p>
+                <Button
+                  className="mt-6 bg-teal-700"
+                  onClick={() => {
+                    setQuote(false);
+                    setStatus('idle');
+                  }}
+                >
+                  Cerrar
+                </Button>
+              </div>
+            ) : (
+              <form className="mt-7 grid gap-4" onSubmit={submit}>
+                <label className="grid gap-1 font-medium text-slate-700">
+                  Nombre completo
+                  <Input name="name" required minLength={2} maxLength={80} className="mt-1" />
+                </label>
+                <label className="grid gap-1 font-medium text-slate-700">
+                  Correo institucional
+                  <Input name="email" required type="email" maxLength={120} className="mt-1" />
+                </label>
+                <label className="grid gap-1 font-medium text-slate-700">
+                  Teléfono
+                  <Input name="phone" required type="tel" minLength={7} maxLength={30} className="mt-1" />
+                </label>
+                <label className="grid gap-1 font-medium text-slate-700">
+                  Institución
+                  <Input name="organization" required minLength={2} maxLength={120} className="mt-1" />
+                </label>
+                <label className="grid gap-1 font-medium text-slate-700">
+                  ¿Qué necesitas?
+                  <Textarea name="need" required minLength={10} maxLength={1000} className="mt-1 min-h-28" />
+                </label>
+
+                {/* Honeypot anti-spam */}
+                <label className="sr-only" aria-hidden="true">
+                  No completar
+                  <Input name="website" tabIndex={-1} autoComplete="off" />
+                </label>
+
+                {status === 'error' && (
+                  <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {message}
+                  </p>
+                )}
+
+                <Button type="submit" disabled={status === 'loading'} className="h-11 bg-teal-700 mt-2">
+                  {status === 'loading' ? 'Enviando…' : 'Enviar solicitud'}
+                </Button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
-
-
